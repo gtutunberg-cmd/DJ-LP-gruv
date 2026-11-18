@@ -1,10 +1,8 @@
 name: Build APK
-'on':
+on:
   push:
-    branches:
-      - main
-      - master
-  workflow_dispatch: null
+    branches: [main, master]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,6 +21,8 @@ jobs:
         run: npm install
       - name: Add Android platform
         run: npx cap add android
+      - name: Lock landscape
+        run: sed -i 's/<activity/<activity android:screenOrientation="landscape"/' android/app/src/main/AndroidManifest.xml
       - name: Sync web assets
         run: npx cap sync android
       - name: Build debug APK
@@ -30,6 +30,5 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: GruvStudio-apk
+          name: DJ-LP-Gruv-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
