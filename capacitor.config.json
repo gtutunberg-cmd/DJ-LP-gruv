@@ -1,0 +1,6 @@
+{
+  "appId": "com.rinat.gruvstudio",
+  "appName": "Грув-студия",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}
