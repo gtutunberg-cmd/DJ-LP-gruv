@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>Грув-студия</title>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>DJ-LP Gruv</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#0b0d12">
 <style>
@@ -72,10 +72,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:26px;border-radius:5px;bac
 .btn.sm{padding:7px 10px;font-size:14px}
 .btn:disabled{opacity:.45;cursor:default}
 
-.gw{overflow-x:auto;margin:0 -14px;padding:0 14px 8px;scrollbar-width:thin;-webkit-user-select:none}
+.gw{overflow-x:auto;padding:0 0 8px;scrollbar-width:thin;-webkit-user-select:none}
 .gr{display:grid;gap:6px;width:max-content;align-items:stretch}
-.corner{position:sticky;left:0;z-index:2;background:#14171f}
-.tn{position:sticky;left:0;z-index:2;background:#14171f;display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding-right:6px;color:var(--c);letter-spacing:.3px}
+.corner{position:sticky;left:0;z-index:2;background:#151821;box-shadow:8px 0 8px #151821}
+.tn{position:sticky;left:0;z-index:2;background:#151821;box-shadow:8px 0 8px #151821;display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding-right:6px;color:var(--c);letter-spacing:.3px}
 .tn .dot{width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
 .sh{border-radius:10px;background:var(--key);border:1px solid var(--line);padding:6px 8px;text-align:left;position:relative;overflow:hidden;min-height:48px}
 .sh b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -156,7 +156,7 @@ audio{width:100%;margin-top:8px}
 </style>
 
 <div class="wrap">
-  <div class="brand"><b>GRUV<i>/</i>STUDIO</b><span>грув-станция на пресетах</span></div>
+  <div class="brand"><b>DJ-LP<i>/</i>GRUV</b><span>грув-станция на пресетах</span></div>
 
   <div class="top">
     <div class="deck">
@@ -779,7 +779,7 @@ function mini(c,k){let a='';for(let i=0;i<16;i++){let on='';
   a+=`<u class="${on}"></u>`}return`<span class="mini">${a}</span>`}
 function renderGrid(){
   const gw=$('gw'),sl=gw.scrollLeft;
-  let h=`<div class="gr" style="grid-template-columns:74px repeat(${S.secs.length},128px)"><div class="corner"></div>`;
+  let h=`<div class="gr" style="grid-template-columns:90px repeat(${S.secs.length},128px)"><div class="corner"></div>`;
   S.secs.forEach((s,si)=>{h+=`<button class="sh${si===sel.si?' sel':''}${si===nowSi?' now':''}" data-si="${si}" aria-label="Секция ${esc(s.name)}"><b>${esc(s.name)}</b><small>${s.bars} т. · ${FXS[s.fx]}</small><i class="pg"></i></button>`});
   TRACKS.forEach((k,ti)=>{
     h+=`<div class="tn" style="--c:${k.color}"><span class="dot"></span>${k.name}</div>`;

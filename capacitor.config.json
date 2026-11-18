@@ -1,6 +1,8 @@
 {
   "appId": "com.rinat.gruvstudio",
-  "appName": "Грув-студия",
+  "appName": "DJ-LP Gruv",
   "webDir": "www",
-  "android": { "allowMixedContent": false }
+  "android": {
+    "allowMixedContent": false
+  }
 }
