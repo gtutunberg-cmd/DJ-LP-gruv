@@ -23,6 +23,44 @@ jobs:
         run: npx cap add android
       - name: Lock landscape
         run: sed -i 's/<activity/<activity android:screenOrientation="landscape"/' android/app/src/main/AndroidManifest.xml
+      - name: Fullscreen (hide system bars)
+        run: |
+          F=$(find android/app/src/main/java -name MainActivity.java)
+          cat > "$F" <<'JAVA'
+          package com.rinat.gruvstudio;
+
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.view.WindowManager;
+          import androidx.core.view.WindowCompat;
+          import androidx.core.view.WindowInsetsCompat;
+          import androidx.core.view.WindowInsetsControllerCompat;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+            @Override
+            public void onCreate(Bundle b) {
+              super.onCreate(b);
+              hideBars();
+            }
+            @Override
+            public void onWindowFocusChanged(boolean f) {
+              super.onWindowFocusChanged(f);
+              if (f) hideBars();
+            }
+            private void hideBars() {
+              if (Build.VERSION.SDK_INT >= 28) {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                getWindow().setAttributes(lp);
+              }
+              WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+              WindowInsetsControllerCompat c = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+              c.hide(WindowInsetsCompat.Type.systemBars());
+              c.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+          }
+          JAVA
       - name: Sync web assets
         run: npx cap sync android
       - name: Build debug APK
