@@ -176,6 +176,12 @@ summary{cursor:pointer;font:700 13px var(--f-ui);letter-spacing:1.4px;text-trans
 .prog>div{height:100%;width:0;background:linear-gradient(90deg,var(--cy),var(--mg));transition:width .1s}
 .stat{color:var(--mute);font-size:14px;min-height:20px;margin-top:8px}
 audio{width:100%;margin-top:10px}
+.tr{background:#0b0c22;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.tr.cur{border-color:var(--cy);box-shadow:0 0 12px #6f8dff44}
+.tr small{color:var(--mute);font-size:14px}
+.tr .tag{color:var(--cy);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+.tr input{font-weight:700}
+.lnote{min-height:20px;color:var(--cy);font-size:14px;margin:8px 0}
 @media (orientation:landscape){
   .deck{flex-wrap:nowrap;gap:6px;padding:6px 8px}
   .lcd{flex:1 1 70px;min-width:70px;padding:4px 8px;gap:8px}
@@ -199,8 +205,9 @@ audio{width:100%;margin-top:10px}
   <div class="bpmbox"><button id="bpmMinus" aria-label="Медленнее">−</button><output id="bpmOut"></output><button id="bpmPlus" aria-label="Быстрее">+</button></div>
   <button class="tg" id="loop" aria-pressed="false" aria-label="Зациклить секцию">ЛУП</button>
   <div class="vu2" aria-hidden="true"><div class="vc" id="vuL"></div><div class="vc" id="vuR"></div></div>
+  <button class="btn" id="bLib">Треки</button>
   <button class="btn" id="bNew">Новый</button>
-  <button class="btn" id="bSet">Настройки</button>
+  <button class="btn" id="bSet" aria-label="Настройки" style="padding-left:11px;padding-right:11px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8"/></svg></button>
   <button class="btn main" id="bMp3">MP3</button>
 </div></div>
 
@@ -214,6 +221,7 @@ audio{width:100%;margin-top:10px}
     <div id="pClip" hidden></div>
     <div id="pSec" hidden></div>
     <div id="pRow" hidden></div>
+    <div id="pLib" hidden></div>
     <div id="pSet" hidden>
       <div class="btns"><button class="btn hot" id="auto">Собрать трек</button><button class="btn" id="autoRnd">Новый вариант</button></div>
       <div class="sub">Темп и тональность</div>
@@ -1062,11 +1070,11 @@ function clipAction(a){
 
 /* ================= панель справа ================= */
 let drawerPage='';
-const TITLES={clip:'Фрагмент',sec:'Секция',row:'Ряд',set:'Настройки',exp:'Экспорт в MP3'};
+const TITLES={clip:'Фрагмент',sec:'Секция',row:'Ряд',lib:'Мои треки',set:'Настройки',exp:'Экспорт в MP3'};
 function openDrawer(p){
   drawerPage=p;$('drawer').hidden=false;$('dtitle').textContent=TITLES[p];
-  ['clip','sec','row','set','exp'].forEach(n=>{$('p'+n[0].toUpperCase()+n.slice(1)).hidden=n!==p});
-  if(p==='clip')renderClip();if(p==='sec')renderSec();if(p==='row')renderRow();if(p==='set')refreshGlobal();
+  ['clip','sec','row','lib','set','exp'].forEach(n=>{$('p'+n[0].toUpperCase()+n.slice(1)).hidden=n!==p});
+  if(p==='clip')renderClip();if(p==='sec')renderSec();if(p==='row')renderRow();if(p==='lib')renderLib();if(p==='set')refreshGlobal();
   document.querySelectorAll('#drawer input[type=range]').forEach(r=>{if(!r.closest('#pClip'))fillRange(r)});
   if(p==='exp')$('len').textContent='≈ '+fmt(totalSteps()*sdur())+' при '+S.bpm+' bpm';
 }
@@ -1115,6 +1123,62 @@ $('pSec').addEventListener('click',e=>{
   afterEdit();
 });
 
+
+
+/* ================= мои треки (библиотека) ================= */
+const LIBKEY='gruv-tracks-v1';
+function libGet(){try{const a=JSON.parse(localStorage.getItem(LIBKEY));return Array.isArray(a)?a:[]}catch(e){return[]}}
+function libSet(a){try{localStorage.setItem(LIBKEY,JSON.stringify(a));return true}catch(e){return false}}
+const stripT=o=>{const c=clone(o);delete c.tid;return JSON.stringify(c)};
+function isSaved(){const e=libGet().find(x=>x.id===S.tid);return !!e&&JSON.stringify(e.data)===stripT(S)}
+const trLen=d=>d.secs.reduce((a,x)=>a+x.bars*16,0)*60/d.bpm/4;
+const fmtDate=ts=>new Date(ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+let libMsg='',libMsgT=0;
+function libNote(m){libMsg=m;const n=$('lnote');if(n)n.textContent=m;clearTimeout(libMsgT);libMsgT=setTimeout(()=>{libMsg='';const n2=$('lnote');if(n2)n2.textContent=''},3500)}
+function renderLib(){
+  const L=libGet().sort((a,b)=>b.ts-a.ts),cur=L.find(x=>x.id===S.tid);
+  const defName='Трек '+(L.length+1);
+  let h=`<label class="f">Название<input type="text" id="lName" maxlength="40" value="${esc(cur?cur.name:defName)}"></label>
+  <div class="btns" style="margin-top:10px"><button class="btn main sm" data-lib="new">Сохранить как новый</button>${cur?`<button class="btn sm" data-lib="upd">Обновить «${esc(cur.name)}»</button>`:''}</div>
+  <div class="lnote" id="lnote">${esc(libMsg)}</div><div class="sub">Сохранённые — сначала новые</div>`;
+  if(!L.length)h+='<div class="empty-note">Пока пусто. Соберите трек и нажмите «Сохранить как новый».</div>';
+  L.forEach(e=>{const d=e.data;
+    h+=`<div class="tr${e.id===S.tid?' cur':''}" data-id="${e.id}"><div>${e.id===S.tid?'<span class="tag">● открыт сейчас</span>':''}<input type="text" class="trn" data-rn="${e.id}" maxlength="40" value="${esc(e.name)}" aria-label="Название трека"></div>
+    <small>${fmtDate(e.ts)} · ${d.bpm} BPM · ${NOTES[d.key]} · ${d.secs.length} ч. · ${fmt(trLen(d))}</small>
+    <div class="btns"><button class="btn main sm" data-lo="${e.id}">Открыть</button><button class="btn sm" data-ldup="${e.id}">Дубль</button><button class="btn sm" data-ld="${e.id}">Удалить</button></div></div>`});
+  $('pLib').innerHTML=h;
+}
+function arm(btn,txt,fn){
+  if(btn.dataset.arm){clearTimeout(+btn.dataset.arm);fn();return}
+  const old=btn.textContent;btn.textContent=txt;btn.classList.add('warn');
+  btn.dataset.arm=setTimeout(()=>{delete btn.dataset.arm;btn.textContent=old;btn.classList.remove('warn')},3000);
+}
+$('pLib').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const A=libGet();
+  if(b.dataset.lib==='new'){
+    const name=($('lName').value.trim()||'Трек '+(A.length+1)).slice(0,40),id=Date.now();
+    A.push({id,ts:id,name,data:JSON.parse(stripT(S))});
+    if(libSet(A)){S.tid=id;save();renderLib();libNote('Сохранено в «Мои треки»')}else libNote('Не хватило места в памяти приложения')
+  }else if(b.dataset.lib==='upd'){
+    const x=A.find(z=>z.id===S.tid);if(!x)return;
+    x.data=JSON.parse(stripT(S));x.ts=Date.now();x.name=($('lName').value.trim()||x.name).slice(0,40);
+    if(libSet(A)){renderLib();libNote('Обновлено')}else libNote('Не хватило места в памяти приложения')
+  }else if(b.dataset.lo){
+    const x=A.find(z=>z.id==b.dataset.lo);if(!x)return;
+    const go=()=>{if(playing)stop();S=Object.assign(clone(x.data),{tid:x.id});if(S.rev==null)S.rev=30;if(S.pump==null)S.pump=60;sel.si=0;sel.ti=0;clipboard=null;refreshGlobal();renderSel();save();closeDrawer();$('gw').scrollLeft=0};
+    if(isSaved()||!S.secs.some(s=>s.clips.some(c=>c)))go();else arm(b,'Текущий не сохранён. Открыть?',go);
+  }else if(b.dataset.ldup){
+    const x=A.find(z=>z.id==b.dataset.ldup);if(!x)return;const id=Date.now();
+    A.push({id,ts:id,name:(x.name+' (копия)').slice(0,40),data:clone(x.data)});if(libSet(A))renderLib();else libNote('Не хватило места в памяти приложения')
+  }else if(b.dataset.ld){
+    arm(b,'Точно?',()=>{const R=A.filter(z=>z.id!=b.dataset.ld);libSet(R);if(S.tid==b.dataset.ld)delete S.tid;save();renderLib()})
+  }
+});
+$('pLib').addEventListener('change',e=>{
+  const id=e.target.dataset.rn;if(!id)return;const A=libGet(),x=A.find(z=>z.id==id);if(!x)return;
+  x.name=e.target.value.trim().slice(0,40)||x.name;libSet(A);renderLib()
+});
 
 /* --- ряд (дорожка целиком) --- */
 function renderRow(){
@@ -1356,7 +1420,7 @@ function newEmpty(){
   if(!newArmed){newArmed=setTimeout(()=>{newArmed=0;$('bNew').textContent='Новый';$('bNew').classList.remove('warn')},3000);$('bNew').textContent='Точно?';$('bNew').classList.add('warn');return}
   clearTimeout(newArmed);newArmed=0;$('bNew').textContent='Новый';$('bNew').classList.remove('warn');
   if(playing)stop();
-  S.secs=[{name:'Часть 1',bars:8,fx:'none',clips:Array(NT).fill(null)}];sel.si=0;sel.ti=0;clipboard=null;
+  S.secs=[{name:'Часть 1',bars:8,fx:'none',clips:Array(NT).fill(null)}];sel.si=0;sel.ti=0;clipboard=null;delete S.tid;
   closeDrawer();renderGrid();renderSel();showIdle();save();$('gw').scrollLeft=0;
 }
 function initGlobal(){
@@ -1370,7 +1434,7 @@ function initGlobal(){
   $('play').onclick=()=>playing?stop():playFrom(sel.si===0||nowSi<0?0:0);
   $('loop').onclick=()=>{loopSec=!loopSec;$('loop').setAttribute('aria-pressed',loopSec)};
   $('auto').onclick=()=>{newSong(false);closeDrawer()};$('autoRnd').onclick=()=>{newSong(true);closeDrawer()};
-  $('dice').onclick=rollTrack;$('bNew').onclick=newEmpty;$('bSet').onclick=()=>openDrawer('set');$('bMp3').onclick=()=>openDrawer('exp');
+  $('dice').onclick=rollTrack;$('bNew').onclick=newEmpty;$('bLib').onclick=()=>openDrawer('lib');$('bSet').onclick=()=>openDrawer('set');$('bMp3').onclick=()=>openDrawer('exp');
 }
 
 /* ================= экспорт MP3 ================= */
