@@ -581,13 +581,13 @@ const MOT=[
  M('Колокольчики',[[0,7,2],[6,9,2],[10,11,2],[16,7,2],[22,4,2],[26,6,3]]),
  M('Прыгучий',[[0,7,1],[3,7,1],[6,9,1],[8,7,1],[11,4,1],[14,5,1],[16,7,1],[19,9,1],[22,11,1],[24,9,1],[27,7,1],[30,4,1]]),
  M('Пэд-аккорды',[[0,[0,2,4],15],[16,[5,7,9],15]])];
-const MS=['Пиано','Щипок','Орган','Колокол','Струнные','Маримба','Синт-стаб','Флейта','Электропиано','Гитара','Хор','Брасс','Лид-пила'];
+const MS=['Пиано','Щипок','Орган','Колокол','Струнные','Маримба','Синт-стаб','Флейта','Электропиано','Электро-гитара','Хор','Брасс','Лид-пила','Акуст. гитара','Арфа','Скрипка','Виолончель','Саксофон','Рояль','Клавесин','Вибрафон','Ксилофон','Труба','Кларнет','Аккордеон','Банджо'];
 const TRACKS=[
  {id:'kick',name:'Бочка',kind:'drum',color:'#ff4fa3',snd:['Глубокая','Панч','808','Техно','Мягкая'],pre:KICK,def:{snd:0,vol:.95,tone:100}},
  {id:'clap',name:'Клэп',kind:'drum',color:'#c77dff',snd:['Клэп','Малый барабан','Рим-шот','Клэп с хвостом'],pre:CLAP,def:{snd:0,vol:.6,tone:100}},
  {id:'hat',name:'Хэты',kind:'drum',color:'#7df9ff',snd:['Хэт','Шейкер','Райд','Тамбурин'],pre:HAT,def:{snd:0,vol:.4,tone:100}},
  {id:'perc',name:'Перкуссия',kind:'drum',color:'#4cc9f0',snd:['Конга','Том','Коубелл','Клаве','Бонго','Вуд-блок'],pre:PERC,def:{snd:0,vol:.5,tone:100}},
- {id:'bass',name:'Бас',kind:'bass',color:'#4f7bff',snd:['Саб','Пила','Эйсид','Квадрат','Рейз','Слэп'],pre:BASS,def:{snd:1,vol:.8,tone:65}},
+ {id:'bass',name:'Бас',kind:'bass',color:'#4f7bff',snd:['Саб','Пила','Эйсид','Квадрат','Рейз','Слэп','Бас-гитара','Контрабас'],pre:BASS,def:{snd:1,vol:.8,tone:65}},
  {id:'m1',name:'Мотив 1',kind:'mot',color:'#9d6bff',snd:MS,pre:MOT,def:{snd:0,vol:.45,tone:85}},
  {id:'m2',name:'Мотив 2',kind:'mot',color:'#e04fff',snd:MS,pre:MOT,def:{snd:3,vol:.35,tone:100}}];
 const ICONS={"kick": "<circle cx=\"16\" cy=\"16\" r=\"13.5\"/><circle cx=\"16\" cy=\"16\" r=\"10.2\" fill=\"currentColor\" fill-opacity=\".16\"/><circle cx=\"16\" cy=\"16\" r=\"3.6\"/><path d=\"M16 2.5v1.8M16 27.7v1.8M2.5 16h1.8M27.7 16h1.8M6.5 6.5l1.3 1.3M24.2 24.2l1.3 1.3M25.5 6.5l-1.3 1.3M7.8 24.2l-1.3 1.3\"/><path d=\"M28 30l-8.5-8.5\"/><circle cx=\"18.4\" cy=\"19.8\" r=\"2.4\" fill=\"currentColor\"/>", "clap": "<path d=\"M5 10v12.5c0 2.2 4.9 4 11 4s11-1.8 11-4V10\" fill=\"currentColor\" fill-opacity=\".14\"/><ellipse cx=\"16\" cy=\"10\" rx=\"11\" ry=\"4\" fill=\"currentColor\" fill-opacity=\".28\"/><path d=\"M5 15c0 2.2 4.9 4 11 4s11-1.8 11-4\"/><path d=\"M9 17.4v8M13 18.6v8.2M16 19v8.3M19 18.6v8.2M23 17.4v8\"/><path d=\"M5 2.5l9.5 6.3M27 2.5l-9.5 6.3\"/><circle cx=\"4.6\" cy=\"2.2\" r=\"1.3\" fill=\"currentColor\"/><circle cx=\"27.4\" cy=\"2.2\" r=\"1.3\" fill=\"currentColor\"/>", "hat": "<path d=\"M16 3v4\"/><path d=\"M2.5 9.6c0-1.9 6-3.4 13.5-3.4S29.5 7.7 29.5 9.6c0 .9-1.2 1.6-3.3 2.1-3 .7-6.4 1-10.2 1s-7.2-.3-10.2-1c-2.1-.5-3.3-1.2-3.3-2.1z\" fill=\"currentColor\" fill-opacity=\".25\"/><path d=\"M3.5 15.4c3 1.4 7.4 2 12.5 2s9.5-.6 12.5-2\" fill=\"currentColor\" fill-opacity=\".12\"/><circle cx=\"16\" cy=\"6.2\" r=\"1.3\" fill=\"currentColor\"/><path d=\"M16 17.4V30M16 24l-7 6M16 24l7 6\"/>", "perc": "<path d=\"M7.5 7c0 7.5 1.4 14 3.4 20.5h10.2c2-6.5 3.4-13 3.4-20.5\" fill=\"currentColor\" fill-opacity=\".16\"/><ellipse cx=\"16\" cy=\"7\" rx=\"8.5\" ry=\"3.2\" fill=\"currentColor\" fill-opacity=\".3\"/><path d=\"M8 12.2c4.9 2.2 11.1 2.2 16 0M9 18c4.4 2 9.6 2 14 0\"/><path d=\"M10.9 27.5c1.4 1.6 8.8 1.6 10.2 0\"/><path d=\"M9 4.6l.8 2M23 4.6l-.8 2M16 3.8v2\"/>", "bass": "<g transform=\"rotate(38 16 16)\"><path d=\"M14.4 5.5h3.2v13h-3.2z\" fill=\"currentColor\" fill-opacity=\".3\"/><path d=\"M13.6 1.2h4.8l.4 4.3h-5.6z\" fill=\"currentColor\" fill-opacity=\".5\"/><path d=\"M12.7 18c-3.2.7-6.4 2.6-6.4 6.3 0 2.1 1.1 3.1 1.1 4.6 0 1.9 1.8 3 4.7 3h7.8c2.9 0 4.7-1.1 4.7-3 0-1.5 1.1-2.5 1.1-4.6 0-3.7-3.2-5.6-6.4-6.3z\" fill=\"currentColor\" fill-opacity=\".16\"/><path d=\"M12 22.6h8M12 25.4h8\" stroke-width=\"2.2\"/><path d=\"M12.7 29.1h6.6\"/><path d=\"M15.2 5.5v23M16.8 5.5v23\" stroke-width=\".8\"/><path d=\"M14.4 9h3.2M14.4 12.5h3.2M14.4 16h3.2\" stroke-width=\".8\"/></g>", "m1": "<rect x=\"2\" y=\"3.5\" width=\"28\" height=\"5\" rx=\"1.5\" fill=\"currentColor\" fill-opacity=\".2\"/><circle cx=\"7\" cy=\"6\" r=\"1\" fill=\"currentColor\"/><circle cx=\"11\" cy=\"6\" r=\"1\" fill=\"currentColor\"/><path d=\"M22 6h5\" stroke-width=\"2\"/><rect x=\"2\" y=\"9\" width=\"28\" height=\"19\" rx=\"2\" fill=\"currentColor\" fill-opacity=\".08\"/><path d=\"M6 9v19M10 9v19M14 9v19M18 9v19M22 9v19M26 9v19\" stroke-width=\".9\"/><path d=\"M4.8 9h2.6v11H4.8zM8.8 9h2.6v11H8.8zM16.8 9h2.6v11h-2.6zM20.8 9h2.6v11h-2.6zM24.8 9h2.6v11h-2.6z\" fill=\"currentColor\"/>", "m2": "<rect x=\"2\" y=\"4\" width=\"28\" height=\"15\" rx=\"3\" fill=\"currentColor\" fill-opacity=\".12\"/><path d=\"M4.5 11.5c1.6-5 3-5 4.6 0s3 5 4.6 0 3-5 4.6 0 3 5 4.6 0 2.2-3.4 2.8-2.4\" stroke-width=\"1.7\"/><circle cx=\"8\" cy=\"24.5\" r=\"2.6\" fill=\"currentColor\" fill-opacity=\".2\"/><circle cx=\"16\" cy=\"24.5\" r=\"2.6\" fill=\"currentColor\" fill-opacity=\".2\"/><circle cx=\"24\" cy=\"24.5\" r=\"2.6\" fill=\"currentColor\" fill-opacity=\".2\"/><path d=\"M8 22.8v1.5M16 22.8v1.5M24 22.8v1.5\"/>"};
@@ -648,9 +648,9 @@ function genMot(mode){
   return{len:32,nt};
 }
 const MODE_NAME={arp:'Арпеджио',hook:'Хук',stab:'Стабы',pad:'Пэд',bells:'Колокола'};
-const MODE_SND={arp:[1,5,9,3,8],hook:[0,3,5,7,12,8,11],stab:[6,0,4,8,11],pad:[4,2,10,0],bells:[3,5,8]};
+const MODE_SND={arp:[1,5,9,3,8,13,14,19,20,25],hook:[0,3,5,7,12,8,11,15,16,17,18,22,23,24,20,21],stab:[6,0,4,8,11,13,18,24,19],pad:[4,2,10,0,15,16,24,20],bells:[3,5,8,14,20,21]};
 const gMot=(ti,mode,vol)=>mkClip(ti,0,{pre:-1,ed:true,nm:MODE_NAME[mode]+' '+(++genN),d:genMot(mode),snd:pick(MODE_SND[mode]),vol:vol??TRACKS[ti].def.vol,tone:mode==='pad'?70:90});
-const gBass=()=>mkClip(4,0,{pre:-1,ed:true,nm:'Бас '+(++genN),d:genBass(),snd:pick([0,1,1,2,3,4,5])});
+const gBass=()=>mkClip(4,0,{pre:-1,ed:true,nm:'Бас '+(++genN),d:genBass(),snd:pick([0,1,1,2,3,4,5,6])});
 function gDrum(ti){let p='';for(let i=0;i<16;i++){const r=Math.random();p+=ti===2?(i%4===2?(r<.7?'o':'x'):r<.5?'x':r<.75?'g':'.'):(r<.3?'x':r<.45?'g':'.')}
   return mkClip(ti,0,{pre:-1,ed:true,nm:'Ритм '+(++genN),d:{p},snd:pick([0,1,2,3].filter(x=>x<TRACKS[ti].snd.length))})}
 function genSong(){
@@ -766,7 +766,28 @@ function bassNote(ctx,out,snd,t,dur,midi,v){
   else if(snd===2){const l=flt(ctx,'lowpass',2800,14);l.frequency.setValueAtTime(2800,t);l.frequency.exponentialRampToValueAtTime(240,t+.2);osc(ctx,'sawtooth',f,t,end).connect(l);const o2=ctx.createGain();o2.gain.value=.5;l.connect(o2).connect(mix)}
   else if(snd===3){const l=flt(ctx,'lowpass',f*5,1.2),sq=ctx.createGain();sq.gain.value=.5;osc(ctx,'square',f,t,end).connect(l).connect(sq).connect(mix);const s=ctx.createGain();s.gain.value=.5;osc(ctx,'sine',f/2,t,end).connect(s).connect(mix)}
   else if(snd===4){const l=flt(ctx,'lowpass',f*3,6);l.frequency.setValueAtTime(f*2,t);l.frequency.exponentialRampToValueAtTime(Math.min(9000,f*14),t+Math.max(.12,dur*.8));[-12,0,12].forEach(dt=>{const o=osc(ctx,'sawtooth',f,t,end);o.detune.value=dt;o.connect(l)});const g2=ctx.createGain();g2.gain.value=.4;l.connect(g2).connect(mix);const s=ctx.createGain();s.gain.value=.6;osc(ctx,'sine',f,t,end).connect(s).connect(mix)}
-  else{const l=flt(ctx,'lowpass',f*8,2);l.frequency.setValueAtTime(f*9,t);l.frequency.exponentialRampToValueAtTime(f*1.8,t+.16);const sq=ctx.createGain();sq.gain.setValueAtTime(.6,t);sq.gain.exponentialRampToValueAtTime(.18,t+.25);osc(ctx,'square',f,t,end).connect(l).connect(sq).connect(mix);const s=ctx.createGain();s.gain.value=.55;osc(ctx,'sine',f,t,end).connect(s).connect(mix)}
+  else if(snd===5){const l=flt(ctx,'lowpass',f*8,2);l.frequency.setValueAtTime(f*9,t);l.frequency.exponentialRampToValueAtTime(f*1.8,t+.16);const sq=ctx.createGain();sq.gain.setValueAtTime(.6,t);sq.gain.exponentialRampToValueAtTime(.18,t+.25);osc(ctx,'square',f,t,end).connect(l).connect(sq).connect(mix);const s=ctx.createGain();s.gain.value=.55;osc(ctx,'sine',f,t,end).connect(s).connect(mix)}
+  else if(snd===6){const bs=ctx.createBufferSource();bs.buffer=ksBuf(ctx,f,1.6,.9975,.55);const lp=flt(ctx,'lowpass',1100,.7);bs.connect(lp).connect(mix);bs.start(t);bs.stop(t+dur+.3)}
+  else{const bs=ctx.createBufferSource();bs.buffer=ksBuf(ctx,f,2,.9988,.7);const lp=flt(ctx,'lowpass',750,.8),pk=flt(ctx,'peaking',220,1);pk.gain.value=5;bs.connect(lp).connect(pk).connect(mix);bs.start(t);bs.stop(t+dur+.4)}
+}
+const KSC={};
+function ksBuf(ctx,f,len,dec,bri){
+  const sr=ctx.sampleRate,key=sr+'|'+f.toFixed(1)+'|'+len+'|'+dec+'|'+bri;if(KSC[key])return KSC[key];
+  const N=Math.max(2,Math.round(sr/f)),n=Math.floor(sr*len),b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);let pv=0;
+  for(let i=0;i<N;i++){pv=pv*(1-bri)+(Math.random()*2-1)*bri;d[i]=pv}
+  for(let i=N;i<n;i++)d[i]=dec*.5*(d[i-N]+d[i-N-1>=0?i-N-1:i-N]);
+  return KSC[key]=b;
+}
+function ksNote(ctx,out,f,t,hold,v,len,dec,bri,tone){
+  const s=ctx.createBufferSource();s.buffer=ksBuf(ctx,f,len,dec,bri);
+  const lp=flt(ctx,'lowpass',tone,.7),g=gate(ctx,t,hold,v,.001,.25);
+  s.connect(lp).connect(g).connect(out);s.start(t);s.stop(t+hold+.3);return lp;
+}
+function bowed(ctx,out,f,t,dur,v,o){
+  const end=t+dur+.5,l=flt(ctx,'lowpass',o.lp,.9),lfo=osc(ctx,'sine',o.vib,t,end),lg=ctx.createGain();
+  lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(o.vd,t+.35);lfo.connect(lg);
+  [-5,5].forEach(dt=>{const x=osc(ctx,'sawtooth',f,t,end);x.detune.value=dt;lg.connect(x.detune);x.connect(l)});
+  const pk=flt(ctx,'peaking',o.pk,1.2);pk.gain.value=6;l.connect(pk).connect(gate(ctx,t,dur,v*o.g,o.att,.2)).connect(out);
 }
 function leadNote(ctx,out,snd,t,dur,midi,v){
   const f=mtof(midi),end=t+dur+.7;
@@ -798,6 +819,30 @@ function leadNote(ctx,out,snd,t,dur,midi,v){
   case 12:{const l=flt(ctx,'lowpass',4800,2),lfo=osc(ctx,'sine',5.5,t,t+dur+.4),lg=ctx.createGain();lg.gain.value=7;
     [-9,0,9].forEach(dt=>{const o=osc(ctx,'sawtooth',f,t,t+dur+.4);o.detune.value=dt;lfo.connect(lg).connect(o.detune);o.connect(l)});
     l.connect(shaper(ctx,1.5)).connect(gate(ctx,t,dur,v*.42,.01,.1)).connect(out);break}
+  case 13:{const lp=ksNote(ctx,out,f,t,Math.max(dur,.45),v*.9,2.2,.9965,.9,4200);const bd=flt(ctx,'peaking',220,1.2);bd.gain.value=0;break}
+  case 14:{ksNote(ctx,out,f,t,Math.max(dur,.6),v*.85,2.6,.9985,.45,3000);break}
+  case 15:bowed(ctx,out,f,t,dur,v,{lp:3400,vib:5.6,vd:10,pk:1000,g:.5,att:.12});break;
+  case 16:bowed(ctx,out,f,t,dur,v,{lp:1700,vib:5,vd:8,pk:600,g:.6,att:.16});break;
+  case 17:{const l=flt(ctx,'bandpass',1300,.8),g=gate(ctx,t,dur,v*.6,.05,.12),lfo=osc(ctx,'sine',5.2,t,end),lg=ctx.createGain();lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(8,t+.3);lfo.connect(lg);
+    const a=osc(ctx,'sawtooth',f,t,end),b=osc(ctx,'square',f,t,end),bg=ctx.createGain();bg.gain.value=.6;lg.connect(a.detune);lg.connect(b.detune);a.connect(l);b.connect(bg).connect(l);
+    const n=noise(ctx,t,dur+.3),nf=flt(ctx,'bandpass',3500,1),ng=gate(ctx,t,dur,v*.07,.05,.1);n.connect(nf).connect(ng).connect(out);l.connect(shaper(ctx,1.4)).connect(g).connect(out);break}
+  case 18:{const lp=flt(ctx,'lowpass',Math.min(9000,f*9+1500),.5);lp.connect(out);const sc=Math.pow(110/Math.max(60,f),.3);
+    for(let h=1;h<=9;h++){const fh=f*h*Math.sqrt(1+.0004*h*h),a=v*.6/Math.pow(h,1.15),L=Math.max(.25,(3.2-.28*h)*sc);
+      (h<4?[-.5,.5]:[0]).forEach(dt=>osc(ctx,'sine',fh+dt,t,t+L+.2).connect(decay(ctx,t,h<4?a/2:a,L,.002)).connect(lp))}
+    const n=noise(ctx,t,.05),nf=flt(ctx,'bandpass',Math.min(4000,f*3),.8);n.connect(nf).connect(decay(ctx,t,.16*v,.04,.001)).connect(lp);break}
+  case 19:{ksNote(ctx,out,f,t,Math.max(dur,.3),v*.8,1.2,.993,1,6500);ksNote(ctx,out,f*2,t,Math.max(dur,.25),v*.3,1,.99,1,7000);break}
+  case 20:{const tg=ctx.createGain();tg.gain.value=.75;const lfo=osc(ctx,'sine',5,t,t+2.5),lg=ctx.createGain();lg.gain.value=.25;lfo.connect(lg).connect(tg.gain);tg.connect(out);
+    osc(ctx,'sine',f,t,t+2.5).connect(decay(ctx,t,v*.8,2.2,.003)).connect(tg);osc(ctx,'sine',f*4,t,t+1).connect(decay(ctx,t,v*.25,.5,.002)).connect(tg);break}
+  case 21:{osc(ctx,'sine',f,t,t+.5).connect(decay(ctx,t,v*.9,.28,.001)).connect(out);osc(ctx,'sine',f*3.9,t,t+.3).connect(decay(ctx,t,v*.35,.08,.001)).connect(out);
+    const n=noise(ctx,t,.02),nf=flt(ctx,'bandpass',4000,1.5);n.connect(nf).connect(decay(ctx,t,.15*v,.01,.001)).connect(out);break}
+  case 22:{const l=flt(ctx,'lowpass',900,1.2);l.frequency.setValueAtTime(900,t);l.frequency.exponentialRampToValueAtTime(4200,t+.07);l.frequency.exponentialRampToValueAtTime(2600,t+Math.max(.2,dur));
+    const pk=flt(ctx,'peaking',1500,1.2);pk.gain.value=6;superSaw(ctx,f,t,t+dur+.3,3,8,l);l.connect(pk).connect(shaper(ctx,1.6)).connect(gate(ctx,t,dur,v*.42,.03,.1)).connect(out);break}
+  case 23:{const l=flt(ctx,'lowpass',Math.min(3200,f*7),.8),sq=osc(ctx,'square',f,t,t+dur+.4),lfo=osc(ctx,'sine',4.8,t,t+dur+.4),lg=ctx.createGain();lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(5,t+.4);lfo.connect(lg).connect(sq.detune);
+    sq.connect(l).connect(gate(ctx,t,dur,v*.38,.06,.12)).connect(out);const n=noise(ctx,t,dur+.2),nf=flt(ctx,'bandpass',3000,1);n.connect(nf).connect(gate(ctx,t,dur,v*.04,.05,.1)).connect(out);break}
+  case 24:{const l=flt(ctx,'lowpass',3000,.7),tg=ctx.createGain();tg.gain.value=.85;const lfo=osc(ctx,'sine',6,t,t+dur+.4),lg=ctx.createGain();lg.gain.value=.15;lfo.connect(lg).connect(tg.gain);
+    [-12,0,12].forEach(dt=>{const o=osc(ctx,'sawtooth',f,t,t+dur+.4);o.detune.value=dt;o.connect(l)});const sq=osc(ctx,'square',f*2,t,t+dur+.4),sg=ctx.createGain();sg.gain.value=.25;sq.connect(sg).connect(l);
+    l.connect(tg).connect(gate(ctx,t,dur,v*.36,.03,.1)).connect(out);break}
+  case 25:{ksNote(ctx,out,f,t,Math.max(dur,.3),v*.85,.9,.984,1,7500);break}
   default:{const o=osc(ctx,'triangle',f,t,end),lfo=osc(ctx,'sine',5.2,t,end),lg=ctx.createGain();lg.gain.value=9;lfo.connect(lg).connect(o.detune);
     const g=gate(ctx,t,dur,v*.6,.07,.12);o.connect(g);const n=noise(ctx,t,dur+.3),nf=flt(ctx,'bandpass',4200,2),ng=gate(ctx,t,dur,v*.05,.05,.1);n.connect(nf).connect(ng).connect(out);g.connect(out)}
   }
