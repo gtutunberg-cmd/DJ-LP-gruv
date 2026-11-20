@@ -61,6 +61,17 @@ jobs:
             }
           }
           JAVA
+      - name: App icon
+        run: |
+          sudo apt-get install -y imagemagick >/dev/null 2>&1 || true
+          R=android/app/src/main/res
+          rm -rf $R/mipmap-anydpi-v26
+          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            n=${d%%:*}; z=${d##*:}
+            convert icon.png -resize ${z}x${z} $R/mipmap-$n/ic_launcher.png
+            cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_round.png
+            cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_foreground.png
+          done
       - name: Sync web assets
         run: npx cap sync android
       - name: Build debug APK
