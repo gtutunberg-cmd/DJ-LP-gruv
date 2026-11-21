@@ -253,6 +253,7 @@ audio{width:100%;margin-top:10px}
   </div>
 </div>
 <input type="file" id="smpFile" accept="audio/*" hidden>
+<input type="file" id="smpAsIs" accept="audio/*" hidden>
 
 <script>function lamejs(){function X(c){return new Int32Array(c)}function K(c){return new Float32Array(c)}function ca(c){if(1==c.length)return K(c[0]);var k=c[0];c=c.slice(1);for(var n=[],u=0;u<k;u++)n.push(ca(c));return n}function Ia(c){if(1==c.length)return X(c[0]);var k=c[0];c=c.slice(1);for(var n=[],u=0;u<k;u++)n.push(Ia(c));return n}function dc(c){if(1==c.length)return new Int16Array(c[0]);var k=c[0];c=c.slice(1);for(var n=[],u=0;u<k;u++)n.push(dc(c));return n}function Ob(c){if(1==c.length)return Array(c[0]);
 var k=c[0];c=c.slice(1);for(var n=[],u=0;u<k;u++)n.push(Ob(c));return n}function ra(c){this.ordinal=c}function G(c){this.ordinal=c}function la(c){this.ordinal=function(){return c}}function mc(){this.getLameVersion=function(){return"3.98.4"};this.getLameShortVersion=function(){return"3.98.4"};this.getLameVeryShortVersion=function(){return"LAME3.98r"};this.getPsyVersion=function(){return"0.93"};this.getLameUrl=function(){return"http://www.mp3dev.org/"};this.getLameOsBitness=function(){return"32bits"}}
@@ -709,10 +710,13 @@ function gate(ctx,t,dur,peak,a,r){const g=ctx.createGain();g.gain.setValueAtTime
 function decay(ctx,t,peak,d,a=.002){const g=ctx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+d);return g}
 function superSaw(ctx,f,t,end,n,spread,dest){const g=ctx.createGain();g.gain.value=1/Math.sqrt(n);for(let i=0;i<n;i++){const o=osc(ctx,'sawtooth',f,t,end);o.detune.value=(i-(n-1)/2)*spread;o.connect(g)}g.connect(dest);return g}
 function metal(ctx,t,dur,p,dest,gain){const g=ctx.createGain();g.gain.value=gain;[2,3,4.16,5.43,6.79,8.21].forEach(r=>osc(ctx,'square',350*r*p,t,t+dur).connect(g));g.connect(dest)}
+let LIVECTX=null;const LIVE=[];
+function stopLive(){if(!LIVECTX)return;const n=LIVECTX.currentTime;LIVE.forEach(({s,g})=>{try{g.gain.cancelScheduledValues(n);g.gain.setTargetAtTime(0,n,.02);s.stop(n+.15)}catch(e){}});LIVE.length=0}
 function playSample(ctx,out,buf,t,v,rate,dur){
   const s=ctx.createBufferSource();s.buffer=buf;s.playbackRate.value=rate;const g=ctx.createGain();g.gain.setValueAtTime(v,t);
   if(dur){g.gain.setValueAtTime(v,t+dur);g.gain.linearRampToValueAtTime(0,t+dur+.08);s.start(t);s.stop(t+dur+.1)}else s.start(t);
   s.connect(g).connect(out);
+  if(ctx===LIVECTX){const o={s,g};LIVE.push(o);s.onended=()=>{const i=LIVE.indexOf(o);if(i>=0)LIVE.splice(i,1)}}
 }
 
 function drum(ctx,out,id,snd,t,v,p,open){
@@ -903,11 +907,16 @@ function secFx(ctx,G,si,t){
 }
 function scheduleStep(ctx,G,si,local,t){
   if(S.secs[si].off)return;
-  S.secs[si].clips.forEach((cl,i)=>{if(cl&&!cl.off)playClipStep(ctx,G.t[i].f,i,cl,local,t,G)});
+  S.secs[si].clips.forEach((cl,i)=>{if(cl&&!cl.off)playClipStep(ctx,G.t[i].f,i,cl,local,t,G,S.secs[si].tp||0)});
 }
-function playClipStep(ctx,out,i,cl,local,t,G){
+function playClipStep(ctx,out,i,cl,local,t,G,tp=0){
   const sd=sdur(),base=t+((local%2)?S.swing/100*sd*.5:0);
   const k=TRACKS[i],evs=[],rate=cl.rate,nb=k.snd.length;
+  if(cl.d.asis){
+    const ev=cl.d.every||0;if(local!==0&&!(ev>0&&local%(ev*16)===0))return;
+    const u=USER[i][cl.snd-nb];if(!u)return;
+    playSample(ctx,G?G.sec:out,u.buf,t,cl.vol,1,0);return;
+  }
   if(rate===1)evs.push([local,base]);
   else if(rate===.5){if(local%2===0)evs.push([local/2,base])}
   else{evs.push([local*2,base]);evs.push([local*2+1,base+sd/2])}
@@ -924,7 +933,7 @@ function playClipStep(ctx,out,i,cl,local,t,G){
       const e=cl.d.nt[pos%cl.d.len];if(!e)continue;
       const dur=e.l*sd/rate,pn=ctx.createStereoPanner();pn.pan.value=k.kind==='bass'?0:(Math.random()-.5)*.5;pn.connect(out);
       const vv=k.kind==='bass'?.95*cl.vol:.9/Math.sqrt(e.d.length)*cl.vol;
-      e.d.forEach(d=>{const semi=cl.pitch+deg2semi(d);
+      e.d.forEach(d=>{const semi=cl.pitch+deg2semi(d)+tp;
         if(smp)playSample(ctx,pn,smp.buf,tt,vv*.8,Math.pow(2,(semi-(k.kind==='bass'?12:0))/12),dur);
         else if(k.kind==='bass')bassNote(ctx,pn,snd,tt,dur,bassRoot()+semi,vv);
         else leadNote(ctx,pn,snd,tt,dur,motRoot()+semi,vv)});
@@ -935,7 +944,7 @@ function playClipStep(ctx,out,i,cl,local,t,G){
 /* ================= воспроизведение ================= */
 let idleT=0,ctx=null,G=null,timer=null,playing=false,loopSec=false,nextT=0,cur={si:0,local:0},queue=[];
 function ensureCtx(){
-  if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)({latencyHint:'playback'});G=buildGraph(ctx)}
+  if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)({latencyHint:'playback'});LIVECTX=ctx;G=buildGraph(ctx)}
   clearTimeout(idleT);if(ctx.state==='suspended')ctx.resume();
 }
 function advance(){cur.local++;if(cur.local>=secLen(S.secs[cur.si])){cur.local=0;if(!loopSec)cur.si=(cur.si+1)%S.secs.length}}
@@ -954,7 +963,7 @@ function playFrom(si){
   cur={si,local:0};queue=[];nextT=ctx.currentTime+.08;playing=true;
   timer=setInterval(tick,50);updPlay();kickRaf();
 }
-function stop(silent){clearInterval(timer);timer=null;playing=false;clearTimeout(idleT);idleT=setTimeout(()=>{if(!playing&&!pv&&ctx&&ctx.state==='running')ctx.suspend()},3500);if(!silent){updPlay();clearNow()}}
+function stop(silent){stopLive();clearInterval(timer);timer=null;playing=false;clearTimeout(idleT);idleT=setTimeout(()=>{if(!playing&&!pv&&ctx&&ctx.state==='running')ctx.suspend()},3500);if(!silent){updPlay();clearNow()}}
 function updPlay(){
   $('play').setAttribute('aria-pressed',playing);$('play').setAttribute('aria-label',playing?'Стоп':'Играть');
   $('playIco').innerHTML=playing?'<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>':'<path d="M7 4v16l13-8z"/>';
@@ -1019,19 +1028,20 @@ function raf(ts){
 
 /* ================= лента дорожек ================= */
 function mini(c,k){let a='';for(let i=0;i<16;i++){let on='';
+  if(c.d.asis){a+=`<u class="${i===0?'on':'g'}"></u>`;continue}
   if(k.kind==='drum'){const ch=c.d.p[i];on=ch==='.'?'':ch==='g'?'g':'on'}else on=(c.d.nt[i]||c.d.nt[i+16])?'on':'';
   a+=`<u class="${on}"></u>`}return`<span class="mini">${a}</span>`}
 function renderGrid(){
   const gw=$('gw'),sl=gw.scrollLeft;
   let h=`<div class="gr" style="grid-template-columns:${NAMEW}px ${S.secs.map(s=>secW(s)+'px').join(' ')} 44px"><div class="corner"></div>`;
-  S.secs.forEach((s,si)=>{h+=`<button class="sh${si===sel.si?' sel':''}${si===nowSi?' now':''}${s.off?' off':''}" data-si="${si}" aria-label="Секция ${esc(s.name)}"><b>${esc(s.name)}</b><small>${s.off?'выкл · ':''}${s.bars} т. · ${FXS[s.fx]}</small></button>`});
+  S.secs.forEach((s,si)=>{h+=`<button class="sh${si===sel.si?' sel':''}${si===nowSi?' now':''}${s.off?' off':''}" data-si="${si}" aria-label="Секция ${esc(s.name)}"><b>${esc(s.name)}</b><small>${s.off?'выкл · ':''}${s.bars} т. · ${FXS[s.fx]}${s.tp?' · '+(s.tp>0?'+':'')+s.tp+' пт':''}</small></button>`});
   h+='<button class="addsec" data-add="1" aria-label="Добавить секцию">+</button>';
   TRACKS.forEach((k,ti)=>{
     h+=`<button class="tn" style="--c:${k.color}" data-tr="${ti}" aria-label="Ряд ${k.name}">${ico(ti)}${k.name}</button>`;
     S.secs.forEach((s,si)=>{
       const c=s.clips[ti],on=(si===nowSi?' now':'')+(s.off?' secoff':''),se=(si===sel.si&&ti===sel.ti)?' sel':'';
       if(!c)h+=`<button class="pad empty${se}${on}" style="--c:${k.color}" data-si="${si}" data-ti="${ti}" aria-label="Пусто, добавить">+</button>`;
-      else h+=`<button class="pad${c.off?' off':''}${se}${on}" style="--c:${k.color}" data-si="${si}" data-ti="${ti}" aria-pressed="${!c.off}"><b>${esc(clipName(c,k))}</b><small>${esc(sndName(ti,c.snd))}${c.pitch?' · '+(c.pitch>0?'+':'')+c.pitch:''}</small>${mini(c,k)}</button>`;
+      else h+=`<button class="pad${c.off?' off':''}${se}${on}" style="--c:${k.color}" data-si="${si}" data-ti="${ti}" aria-pressed="${!c.off}"><b>${esc(clipName(c,k))}</b><small>${c.d.asis?'как есть':esc(sndName(ti,c.snd))}${c.pitch&&!c.d.asis?' · '+(c.pitch>0?'+':'')+c.pitch:''}</small>${mini(c,k)}</button>`;
     });
     h+='<div></div>';
   });
@@ -1085,9 +1095,11 @@ function fillRange(r){r.style.setProperty('--pc',((r.value-r.min)/(r.max-r.min)*
 /* --- секция --- */
 function renderSec(){
   const s=S.secs[sel.si];
+  setTimeout(()=>{const v=$('sTpV');if(v){v.textContent=tpLabel(s);fillRange($('sTp'))}},0);
   $('pSec').innerHTML=`<div class="sp">
     <label class="f">Название<input type="text" id="sName" value="${esc(s.name)}" maxlength="24"></label>
     <label class="f">Длина<select id="sBars">${[1,2,4,6,8,12,16,24,32].map(n=>`<option value="${n}"${n===s.bars?' selected':''}>${n} ${n===1?'такт':n<5?'такта':'тактов'}</option>`).join('')}</select></label>
+    <label class="f"><span class="lh">Тональность секции <b id="sTpV"></b></span><input type="range" id="sTp" min="-12" max="12" step="1" value="${s.tp||0}"></label>
     <label class="f">Переход / эффект<select id="sFx">${FX.map(([k,v])=>`<option value="${k}"${k===s.fx?' selected':''}>${v}</option>`).join('')}</select></label>
   </div>
   <div class="btns">
@@ -1103,7 +1115,8 @@ function renderSec(){
     <button class="btn sm" data-sa="del"${S.secs.length<2?' disabled':''}>Удалить</button>
   </div>`;
 }
-$('pSec').addEventListener('input',e=>{if(e.target.id==='sName'){S.secs[sel.si].name=e.target.value||'Секция';renderGrid();renderSel();save()}});
+function tpLabel(s){const t=s.tp||0;return t?`${t>0?'+':''}${t} пт → ${NOTES[((S.key+t)%12+12)%12]}`:'как в треке ('+NOTES[S.key]+')'}
+$('pSec').addEventListener('input',e=>{if(e.target.id==='sTp'){const s=S.secs[sel.si];s.tp=+e.target.value;$('sTpV').textContent=tpLabel(s);fillRange(e.target);renderGrid();save();return}if(e.target.id==='sName'){S.secs[sel.si].name=e.target.value||'Секция';renderGrid();renderSel();save()}});
 $('pSec').addEventListener('change',e=>{const s=S.secs[sel.si];
   if(e.target.id==='sBars'){s.bars=+e.target.value;renderGrid();save()}
   if(e.target.id==='sFx'){s.fx=e.target.value;renderGrid();save()}});
@@ -1209,7 +1222,7 @@ function soundChips(ti,cs){
   const k=TRACKS[ti],n=sndCount(ti);let h='<div class="chips">';
   for(let j=0;j<n;j++){const u=j>=k.snd.length;
     h+=`<span class="chip${j===cs?' cur':''}"><button class="pv" data-sv="${j}" aria-label="Прослушать звук: ${esc(sndName(ti,j))}">▶</button><button class="cn" data-sp="${j}">${esc(sndName(ti,j))}</button>${u?`<button class="cx" data-sdel="${j}" aria-label="Удалить звук">×</button>`:''}</span>`}
-  return h+'<button class="chip add" data-sadd="1">＋ Свой звук</button></div>';
+  return h+'<button class="chip add" data-sadd="1">＋ Свой звук (по нотам)</button><button class="chip add" data-sasis="1" style="color:#c79bff">＋ Свой сэмпл (как есть)</button></div>';
 }
 function renderClip(){
   stopPreview();
@@ -1220,9 +1233,25 @@ function renderClip(){
   if(!c){
     el.innerHTML=`<div class="empty-note">Здесь пусто. Выберите звук и пресет, послушайте кнопкой ▶ и нажмите «Добавить».</div>
       <div class="btns"><button class="btn sm" data-ca="paste"${canPaste?'':' disabled'}>Вставить из буфера</button></div>
+      <div class="btns" style="margin-top:12px"><button class="btn hot sm" data-sasis="1">＋ Свой сэмпл (как есть)</button></div>
       <div class="sub">Звук</div>${soundChips(sel.ti,pvSnd[sel.ti])}
       <div class="sub">Пресеты рисунка</div>${presetList(k,null)}`;
     return;
+  }
+  if(c.d.asis){
+    const u=USER[sel.ti][c.snd-k.snd.length],ev=c.d.every||0;
+    el.innerHTML=`<div class="btns">
+    <button class="btn sm" data-ca="mute">${c.off?'Включить':'Выключить'}</button>
+    <button class="btn sm" data-ca="copy">Копировать</button>
+    <button class="btn sm" data-ca="paste"${canPaste?'':' disabled'}>Вставить</button>
+    <button class="btn sm" data-ca="next">В след. секцию →</button>
+    <button class="btn sm" data-ca="clear">Убрать</button></div>
+    <div class="sub">Свой сэмпл — играет как записан</div>
+    <div class="pr cur" style="grid-template-columns:auto 1fr"><button class="pv" data-asplay="1" aria-label="Прослушать">▶</button><div class="pn"><b>${esc(u?u.name:'файл не найден')}</b><span class="note">${u?u.buf.duration.toFixed(1)+' с · без изменения высоты, темпа и тембра':'загрузите заново'}</span></div></div>
+    <div class="sp" style="margin-top:12px"><label class="f">Когда играть<select data-f="every"><option value="0"${ev===0?' selected':''}>Один раз — в начале секции</option><option value="1"${ev===1?' selected':''}>Каждый такт</option><option value="2"${ev===2?' selected':''}>Каждые 2 такта</option><option value="4"${ev===4?' selected':''}>Каждые 4 такта</option><option value="8"${ev===8?' selected':''}>Каждые 8 тактов</option></select></label></div>
+    <div class="faders" style="margin-top:10px"><label class="f"><span class="lh">Громкость <b data-v="vol"></b></span><input type="range" data-f="vol" min="0" max="100" step="1" value="${Math.round(c.vol*100)}"></label></div>
+    <div class="btns" style="margin-top:12px"><button class="btn sm" data-sasis="1">Заменить файл</button></div>`;
+    updLabels();return;
   }
   const mel=k.kind!=='drum';
   el.innerHTML=`<div class="btns">
@@ -1256,6 +1285,7 @@ function avgLen(c){const v=Object.values(c.d.nt);return v.length?v[0].l:1}
 function updLabels(){
   const c=curClip();if(!c)return;
   const q=n=>document.querySelector(`#pClip [data-v="${n}"]`);
+  if(c.d.asis){q('vol').textContent=Math.round(c.vol*100);document.querySelectorAll('#pClip input[type=range]').forEach(fillRange);return}
   const mel=TRACKS[sel.ti].kind!=='drum';
   q('pitch').textContent=(c.pitch>0?'+':'')+c.pitch+' пт';q('tone').textContent=c.tone;q('vol').textContent=Math.round(c.vol*100);
   if(mel)q('nl').textContent=(c.d.nl||avgLen(c))+' шаг.';
@@ -1333,6 +1363,17 @@ async function loadSamples(){
   for(const r of all){try{USER[r.ti].push({id:r.id,name:r.name,buf:await decodeBuf(r.data)})}catch(e){}}
   if(all.length){renderGrid();if(drawerPage==='clip')renderClip()}
 }
+$('smpAsIs').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;const ti=sel.ti;
+  try{
+    const data=await f.arrayBuffer(),buf=await decodeBuf(data);
+    const rec={id:Date.now(),ti,name:f.name.replace(/\.[^.]+$/,'').slice(0,24),data};
+    USER[ti].push({id:rec.id,name:rec.name,buf});idbPut(rec);
+    const j=sndCount(ti)-1,old=curClip();
+    S.secs[sel.si].clips[ti]=mkClip(ti,0,{pre:-1,ed:true,nm:rec.name,snd:j,d:{asis:true,every:old&&old.d.asis?old.d.every:0},vol:old?old.vol:.9,tone:100});
+    afterEdit();
+  }catch(err){$('pClip').insertAdjacentHTML('afterbegin','<div class="note" style="color:#ff6b6b;margin-bottom:8px">Не удалось прочитать файл. Подойдёт mp3, wav или m4a.</div>')}
+});
 $('smpFile').addEventListener('change',async e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   const ti=sel.ti;
@@ -1353,6 +1394,11 @@ $('pClip').addEventListener('click',e=>{
   const pvb=e.target.closest('[data-pv]');if(pvb){togglePreview(sel.ti,+pvb.dataset.pv,pvb);return}
   const svb=e.target.closest('[data-sv]');if(svb){auditionSound(sel.ti,+svb.dataset.sv,svb);return}
   if(e.target.closest('[data-sadd]')){$('smpFile').click();return}
+  if(e.target.closest('[data-sasis]')){$('smpAsIs').click();return}
+  const asp=e.target.closest('[data-asplay]');
+  if(asp&&c&&c.d.asis){const was=asp.classList.contains('on');stopLive();asp.classList.remove('on');asp.textContent='▶';if(was)return;
+    const u=USER[sel.ti][c.snd-k.snd.length];if(!u)return;ensureCtx();playSample(ctx,G.sec,u.buf,ctx.currentTime+.03,c.vol,1,0);asp.classList.add('on');asp.textContent='■';
+    setTimeout(()=>{asp.classList.remove('on');asp.textContent='▶'},u.buf.duration*1000+100);return}
   const sdb=e.target.closest('[data-sdel]');
   if(sdb){const j=+sdb.dataset.sdel,ui=j-k.snd.length,u=USER[sel.ti][ui];if(u){idbDel(u.id);USER[sel.ti].splice(ui,1);
     S.secs.forEach(sc=>{const cl=sc.clips[sel.ti];if(cl){if(cl.snd===j)cl.snd=0;else if(cl.snd>j)cl.snd--}});
@@ -1377,6 +1423,7 @@ $('pClip').addEventListener('click',e=>{
 });
 $('pClip').addEventListener('change',e=>{
   const c=curClip();const f=e.target.dataset.f;if(!f||!c||e.target.tagName!=='SELECT')return;
+  if(f==='every'){c.d.every=+e.target.value;save();return}
   if(f==='rate')c.rate=+e.target.value;
   else if(f==='len'){const nl=+e.target.value;if(nl===32&&c.d.len===16){for(let i=0;i<16;i++)if(c.d.nt[i])c.d.nt[i+16]=clone(c.d.nt[i])}else if(nl===16){for(let i=16;i<32;i++)delete c.d.nt[i]}c.d.len=nl;c.ed=true;renderPat()}
   renderGrid();save();
